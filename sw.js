@@ -2,15 +2,15 @@
    Caches the whole app so it opens with no signal.
    Bump CACHE when you change any file, or phones keep serving the old copy. */
 
-const CACHE = 'hill-legs-v3';
+const CACHE = 'hill-legs-v4';
 
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png'
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
