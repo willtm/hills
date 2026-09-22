@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#101619">
+<title>Hill Legs</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --ground:#101619;
+    --ground-2:#182126;
+    --ridge:#232f36;
+    --ink:#e9e6df;
+    --ink-dim:#8d9aa1;
+    --ascent:#e0ac3f;
+    --descent:#84a9b6;
+    --tap:48px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:system-ui,-apple-system,"Roboto","Segoe UI",sans-serif;
+    font-size:17px;line-height:1.4;padding:0 0 3rem;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:34rem;margin:0 auto;padding:0 1rem}
+
+  header{padding:1.5rem 0 .5rem}
+  .ridge-art{display:block;width:100%;height:54px;margin-bottom:1rem}
+  h1{font-size:2rem;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.05}
+  .sub{color:var(--ink-dim);font-size:.95rem;margin:.35rem 0 0}
+  .last{color:var(--ink-dim);font-size:.95rem;margin:.15rem 0 0}
+
+  section{margin-top:2rem}
+  .block-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--ridge);
+  }
+  h2{font-size:1.15rem;font-weight:650;margin:0;letter-spacing:-.01em}
+  .rounds-static{color:var(--ascent);font-size:.95rem;font-weight:600;white-space:nowrap}
+  .block-note{color:var(--ink-dim);font-size:.9rem;margin:.5rem 0 0}
+
+  /* round counter */
+  .counter{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:.75rem;padding:.6rem 0;margin-top:.35rem;
+    border-bottom:1px solid var(--ground-2);
+  }
+  .counter .clabel{color:var(--ink-dim);font-size:.95rem}
+  .dots{display:flex;gap:.3rem;margin-left:auto;padding-right:.15rem}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ridge)}
+  .dot.on{background:var(--ascent)}
+  .dot.extra{background:var(--descent)}
+
+  .stepper{display:flex;align-items:center;gap:.25rem}
+  .stepper button{
+    width:var(--tap);height:var(--tap);
+    background:var(--ground-2);border:1px solid var(--ridge);border-radius:10px;
+    color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;
+  }
+  .stepper button:active{background:var(--ridge)}
+  .val{min-width:3.6rem;text-align:center;font-size:1.05rem;font-weight:650}
+  .val .unit{color:var(--ink-dim);font-size:.8rem;font-weight:400}
+  .val.body{font-size:.95rem;font-weight:500;color:var(--ink-dim)}
+  .val.rounds-val{min-width:3.2rem}
+  .val.rounds-val .of{color:var(--ink-dim);font-size:.8rem;font-weight:400}
+
+  .ex{border-bottom:1px solid var(--ground-2)}
+  .row{display:flex;align-items:stretch;gap:.5rem}
+  .tapname{
+    flex:1;min-width:0;background:none;border:0;padding:.85rem 0;
+    color:inherit;font:inherit;text-align:left;cursor:pointer;min-height:var(--tap);
+  }
+  .name{display:block;font-size:1.08rem;font-weight:600;line-height:1.25}
+  .reps{display:block;color:var(--ink-dim);font-size:.92rem;margin-top:.1rem}
+  .tapname[aria-expanded="true"] .name{color:var(--ascent)}
+  .load{display:flex;align-items:center;gap:.25rem;padding:.5rem 0}
+
+  .detail{display:none;padding:0 0 1rem}
+  .detail.open{display:block}
+  .cue{margin:0 0 .7rem;border-left:3px solid var(--descent);padding-left:.7rem;font-size:.98rem}
+  .demo{
+    display:inline-block;min-height:var(--tap);line-height:var(--tap);
+    padding:0 1rem;border:1px solid var(--ridge);border-radius:10px;
+    color:var(--descent);text-decoration:none;font-size:.95rem;font-weight:600;
+  }
+
+  .plain{padding:.9rem 0;border-bottom:1px solid var(--ground-2)}
+  .plain .name{font-size:1.08rem}
+
+  .log{margin-top:2.5rem}
+  .log button.primary{
+    width:100%;min-height:var(--tap);background:var(--ascent);border:0;border-radius:12px;
+    color:var(--ground);font:inherit;font-weight:700;font-size:1rem;cursor:pointer;
+  }
+  .log button.primary:active{filter:brightness(.9)}
+  .log button.secondary{
+    width:100%;min-height:var(--tap);margin-top:.6rem;
+    background:none;border:1px solid var(--ridge);border-radius:12px;
+    color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer;
+  }
+  .note{color:var(--ink-dim);font-size:.85rem;margin:.9rem 0 0;line-height:1.45}
+
+  .history{margin-top:2rem}
+  .history h2{margin-bottom:.5rem}
+  .hrow{
+    display:flex;justify-content:space-between;gap:1rem;
+    padding:.6rem 0;border-bottom:1px solid var(--ground-2);font-size:.95rem;
+  }
+  .hrow .hdate{font-weight:600}
+  .hrow .hmeta{color:var(--ink-dim)}
+  .empty{color:var(--ink-dim);font-size:.95rem;padding:.6rem 0}
+
+  .reset{
+    background:none;border:0;color:var(--ink-dim);font:inherit;font-size:.85rem;
+    text-decoration:underline;margin-top:1.25rem;cursor:pointer;padding:.5rem;
+    display:block;margin-left:auto;margin-right:auto;
+  }
+  .settings{margin-top:2rem}
+  .settings summary{
+    list-style:none;cursor:pointer;color:var(--ink-dim);font-size:.9rem;
+    padding:.75rem 0;min-height:var(--tap);display:flex;align-items:center;
+  }
+  .settings summary::-webkit-details-marker{display:none}
+  .settings summary::before{content:'\203A';margin-right:.5rem;display:inline-block;transition:transform .15s}
+  .settings[open] summary::before{transform:rotate(90deg)}
+  .settings input{
+    width:100%;min-height:var(--tap);margin-top:.5rem;padding:.6rem .75rem;
+    background:var(--ground-2);border:1px solid var(--ridge);border-radius:10px;
+    color:var(--ink);font:inherit;font-size:.9rem;
+  }
+  .settings .save-url{
+    width:100%;min-height:var(--tap);margin-top:.6rem;
+    background:none;border:1px solid var(--ridge);border-radius:12px;
+    color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer;
+  }
+  .sync-badge{font-size:.8rem;color:var(--ink-dim);font-weight:400}
+  .sync-badge.pending{color:var(--ascent)}
+  :focus-visible{outline:2px solid var(--descent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <svg class="ridge-art" viewBox="0 0 340 54" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 50 L46 44 L92 30 L138 33 L184 8" fill="none" stroke="#e0ac3f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M184 8 L226 26 L268 20 L306 40 L340 36" fill="none" stroke="#84a9b6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="184" cy="8" r="4" fill="#e9e6df"/>
+  </svg>
+  <h1>Hill legs</h1>
+  <p class="sub">About 35 minutes. Warm up, three rounds, two rounds, finish.</p>
+  <p class="last" id="lastDone"></p>
+</header>
+
+<section>
+  <div class="block-head"><h2>Warm up</h2><span class="rounds-static">5 min</span></div>
+  <div class="plain">
+    <span class="name">Treadmill, uphill</span>
+    <span class="reps">8&ndash;10% incline at 3.0&ndash;3.2 mph. Hands off the rails.</span>
+  </div>
+</section>
+
+<section>
+  <div class="block-head"><h2>Hill mechanics</h2><span class="rounds-static">target 3</span></div>
+  <div class="counter" id="counterA"></div>
+  <div id="blockA"></div>
+</section>
+
+<section>
+  <div class="block-head"><h2>Everything else</h2><span class="rounds-static">target 2</span></div>
+  <div class="counter" id="counterB"></div>
+  <div id="blockB"></div>
+</section>
+
+<section>
+  <div class="block-head"><h2>Finish</h2><span class="rounds-static">4 min</span></div>
+  <div class="plain">
+    <span class="name">Treadmill or rower</span>
+    <span class="reps">10&ndash;12% incline at 3.0 mph, or 500 m on the rower.</span>
+  </div>
+</section>
+
+<div class="log">
+  <button class="primary" id="logBtn">Save this session</button>
+  <button class="secondary" id="exportBtn">Download all sessions as CSV</button>
+  <p class="note" id="logNote">Saving records the date, your rounds, and every weight, then resets the round counters. Sessions save on this phone first, then sync to your Google Sheet if you have set one up under Sync and storage.</p>
+</div>
+
+<details class="settings">
+  <summary>Sync and storage</summary>
+  <p class="note" id="storageState">Checking storage&hellip;</p>
+  <label class="note" for="endpoint">Google Sheet endpoint. Paste the web app URL from your Apps Script deployment. It stays on this phone.</label>
+  <input id="endpoint" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/&hellip;/exec">
+  <button class="save-url" id="saveEndpoint">Save endpoint</button>
+  <button class="save-url" id="syncNow">Send unsent sessions now</button>
+  <p class="note" id="syncState"></p>
+</details>
+
+<section class="history">
+  <div class="block-head"><h2>Sessions</h2><span class="sync-badge" id="syncBadge"></span></div>
+  <div id="historyList"></div>
+  <button class="reset" id="resetBtn">Clear everything</button>
+</section>
+
+</div>
+
+<script>
+var A = [
+  {id:'bss',  name:'Bulgarian split squat', reps:'8 each leg', start:20, step:5,
+   cue:'Rear foot on the bench, front heel planted, torso tall. This is your uphill step.',
+   yt:'hiLF_pF3EJM'},
+  {id:'sd',   name:'Bench step-down', reps:'8 each leg', start:0, step:5,
+   cue:'Three seconds down. Tap the heel light and drive back up. Go lighter than you think.',
+   yt:'d93bbZvxe_w'},
+  {id:'rdl',  name:'Dumbbell Romanian deadlift', reps:'10 reps', start:25, step:5,
+   cue:'Hips back, dumbbells close to the legs, slow on the way down.',
+   yt:'aa57T45iFSE'},
+  {id:'thr',  name:'Hip thrust', reps:'12 reps', start:30, step:5,
+   cue:'Set the dumbbell on your hips while seated, then lie back. Pause at the top, ribs down.',
+   yt:'29OfN4ztW_g'},
+  {id:'calf', name:'Calf raise', reps:'15 reps', start:25, step:5,
+   cue:'Off the edge of the step. Full stretch at the bottom, all the way up.',
+   yt:'uhLjADhUxFM'}
+];
+
+var B = [
+  {id:'bp',   name:'Dumbbell bench press', reps:'10 reps', start:25, step:5,
+   cue:'Or push-ups if the bench is taken.', yt:'xhEhjF5ozuY'},
+  {id:'row',  name:'Single-arm row', reps:'10 each side', start:30, step:5,
+   cue:'Knee and hand on the bench, flat back, pull to the hip.', yt:'fURsHPHgssI'},
+  {id:'trx',  name:'Strap row', reps:'10 reps', start:null, step:0,
+   cue:'Walk your feet forward to make it harder.', yt:'N_14s8zFOms'},
+  {id:'press',name:'Half-kneeling press', reps:'8 each side', start:15, step:5,
+   cue:'Squeeze the down-side glute so you press from a stable base.', yt:'2WoOrh3dqss'},
+  {id:'plank',name:'Plank with slow reach', reps:'30 seconds', start:null, step:0,
+   cue:'Hips level. Reach slowly rather than tapping fast.', yt:'gKA5LBy7WAI'}
+];
+
+var ALL = A.concat(B);
+var LOADED = ALL.filter(function(e){ return e.start !== null; });
+
+var KEY = 'hill-legs-v2';
+var OLDKEY = 'hill-legs-v1';
+var store = {weights:{}, rounds:{A:0,B:0}, sessions:[]};
+var storageOK = true;
+
+try {
+  var raw = localStorage.getItem(KEY);
+  if (raw) {
+    store = JSON.parse(raw);
+  } else {
+    // carry weights over from the first version if it is there
+    var old = localStorage.getItem(OLDKEY);
+    if (old) {
+      var o = JSON.parse(old);
+      LOADED.forEach(function(e){
+        if (o[e.id] !== undefined) store.weights[e.id] = o[e.id];
+      });
+    }
+  }
+} catch (e) { storageOK = false; }
+
+if (!store.weights) store.weights = {};
+if (!store.rounds)  store.rounds  = {A:0,B:0};
+if (!store.sessions) store.sessions = [];
+
+function save(){
+  if (!storageOK) return;
+  try { localStorage.setItem(KEY, JSON.stringify(store)); }
+  catch (e) {
+    storageOK = false;
+    document.getElementById('logNote').textContent =
+      'This browser is blocking storage, so nothing will be remembered between visits.';
+  }
+}
+
+function weightOf(ex){
+  return store.weights[ex.id] !== undefined ? store.weights[ex.id] : ex.start;
+}
+
+function label(v){
+  if (v === 0) return '<span class="unit">body</span>';
+  return v + ' <span class="unit">lb</span>';
+}
+
+/* ---------- round counters ---------- */
+function buildCounter(key, target, mount){
+  var clabel = document.createElement('span');
+  clabel.className = 'clabel';
+  clabel.textContent = 'Rounds done';
+
+  var dots = document.createElement('span');
+  dots.className = 'dots';
+
+  var stepper = document.createElement('div');
+  stepper.className = 'stepper';
+
+  var minus = document.createElement('button');
+  minus.textContent = '\u2212';
+  minus.setAttribute('aria-label','One fewer round');
+
+  var val = document.createElement('span');
+  val.className = 'val rounds-val';
+
+  var plus = document.createElement('button');
+  plus.textContent = '+';
+  plus.setAttribute('aria-label','One more round');
+
+  function paint(){
+    var n = store.rounds[key];
+    val.innerHTML = n + ' <span class="of">of ' + target + '</span>';
+    dots.innerHTML = '';
+    var shown = Math.max(target, n);
+    for (var i = 0; i < shown; i++){
+      var d = document.createElement('span');
+      d.className = 'dot' + (i < n ? (i < target ? ' on' : ' extra') : '');
+      dots.appendChild(d);
+    }
+  }
+  minus.addEventListener('click', function(){
+    store.rounds[key] = Math.max(0, store.rounds[key] - 1); paint(); save();
+  });
+  plus.addEventListener('click', function(){
+    store.rounds[key] = store.rounds[key] + 1; paint(); save();
+  });
+
+  stepper.appendChild(minus); stepper.appendChild(val); stepper.appendChild(plus);
+  mount.appendChild(clabel); mount.appendChild(dots); mount.appendChild(stepper);
+  paint();
+  return paint;
+}
+
+var paintA = buildCounter('A', 3, document.getElementById('counterA'));
+var paintB = buildCounter('B', 2, document.getElementById('counterB'));
+
+/* ---------- exercise rows ---------- */
+function render(list, mount){
+  list.forEach(function(ex){
+    var wrap = document.createElement('div');
+    wrap.className = 'ex';
+
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    var btn = document.createElement('button');
+    btn.className = 'tapname';
+    btn.setAttribute('aria-expanded','false');
+    btn.innerHTML = '<span class="name">' + ex.name + '</span>' +
+                    '<span class="reps">' + ex.reps + '</span>';
+    row.appendChild(btn);
+
+    if (ex.start !== null){
+      var load = document.createElement('div');
+      load.className = 'load stepper';
+
+      var minus = document.createElement('button');
+      minus.textContent = '\u2212';
+      minus.setAttribute('aria-label','Less weight for ' + ex.name);
+
+      var valEl = document.createElement('span');
+      var v = weightOf(ex);
+      valEl.className = 'val' + (v === 0 ? ' body' : '');
+      valEl.innerHTML = label(v);
+
+      var plus = document.createElement('button');
+      plus.textContent = '+';
+      plus.setAttribute('aria-label','More weight for ' + ex.name);
+
+      function bump(delta){
+        var cur = Math.max(0, weightOf(ex) + delta);
+        store.weights[ex.id] = cur;
+        valEl.className = 'val' + (cur === 0 ? ' body' : '');
+        valEl.innerHTML = label(cur);
+        save();
+      }
+      minus.addEventListener('click', function(){ bump(-ex.step); });
+      plus.addEventListener('click', function(){ bump(ex.step); });
+
+      load.appendChild(minus); load.appendChild(valEl); load.appendChild(plus);
+      row.appendChild(load);
+    }
+
+    var detail = document.createElement('div');
+    detail.className = 'detail';
+    detail.innerHTML = '<p class="cue">' + ex.cue + '</p>' +
+      '<a class="demo" target="_blank" rel="noopener" ' +
+      'href="https://www.youtube.com/watch?v=' + ex.yt + '">Watch the demo</a>';
+
+    btn.addEventListener('click', function(){
+      var open = detail.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    wrap.appendChild(row); wrap.appendChild(detail);
+    mount.appendChild(wrap);
+  });
+}
+render(A, document.getElementById('blockA'));
+render(B, document.getElementById('blockB'));
+
+/* ---------- history ---------- */
+function fmt(ts){
+  var d = new Date(ts);
+  return d.toLocaleDateString(undefined,{month:'short', day:'numeric', year:'numeric'});
+}
+
+function showLast(){
+  var el = document.getElementById('lastDone');
+  if (!store.sessions.length){ el.textContent = 'No sessions saved yet.'; return; }
+  var s = store.sessions[store.sessions.length - 1];
+  var days = Math.floor((Date.now() - s.ts) / 86400000);
+  var when = days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+  el.textContent = 'Last done ' + when + '. ' + store.sessions.length +
+    (store.sessions.length === 1 ? ' session saved.' : ' sessions saved.');
+}
+
+function showHistory(){
+  var mount = document.getElementById('historyList');
+  mount.innerHTML = '';
+  if (!store.sessions.length){
+    mount.innerHTML = '<p class="empty">Sessions appear here once you save one.</p>';
+    return;
+  }
+  store.sessions.slice().reverse().slice(0, 8).forEach(function(s){
+    var r = document.createElement('div');
+    r.className = 'hrow';
+    r.innerHTML = '<span class="hdate">' + fmt(s.ts) + '</span>' +
+      '<span class="hmeta">' + s.rounds.A + ' + ' + s.rounds.B + ' rounds</span>';
+    mount.appendChild(r);
+  });
+  if (store.sessions.length > 8){
+    var more = document.createElement('p');
+    more.className = 'empty';
+    more.textContent = store.sessions.length - 8 + ' older sessions are in the CSV.';
+    mount.appendChild(more);
+  }
+}
+
+showLast();
+showHistory();
+
+/* ---------- save a session ---------- */
+document.getElementById('logBtn').addEventListener('click', function(){
+  var snapshot = {};
+  LOADED.forEach(function(e){ snapshot[e.id] = weightOf(e); });
+  store.sessions.push({
+    ts: Date.now(),
+    rounds: {A: store.rounds.A, B: store.rounds.B},
+    weights: snapshot
+  });
+  store.rounds = {A:0, B:0};
+  paintA(); paintB();
+  save();
+  showLast(); showHistory();
+
+  var b = this;
+  b.textContent = 'Saved';
+  setTimeout(function(){ b.textContent = 'Save this session'; }, 1500);
+
+  if (typeof pushSessions === 'function') pushSessions();
+});
+
+/* ---------- CSV ---------- */
+function csvCell(v){
+  var s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+
+document.getElementById('exportBtn').addEventListener('click', function(){
+  if (!store.sessions.length){ alert('No sessions saved yet.'); return; }
+
+  var header = ['date','rounds_hill','rounds_other'].concat(
+    LOADED.map(function(e){ return e.id + '_lb'; })
+  );
+  var lines = [header.join(',')];
+
+  store.sessions.forEach(function(s){
+    var d = new Date(s.ts);
+    var iso = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+    var row = [iso, s.rounds.A, s.rounds.B].concat(
+      LOADED.map(function(e){
+        return s.weights[e.id] !== undefined ? s.weights[e.id] : '';
+      })
+    );
+    lines.push(row.map(csvCell).join(','));
+  });
+
+  var blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'hill-legs-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+});
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  if (!confirm('Delete all saved sessions and weights? Download the CSV first if you want to keep them.')) return;
+  store = {weights:{}, rounds:{A:0,B:0}, sessions:[]};
+  save();
+  location.reload();
+});
+
+/* ---------- ask Android to keep our storage ---------- */
+function reportStorage(){
+  var el = document.getElementById('storageState');
+  if (!navigator.storage || !navigator.storage.persisted){
+    el.textContent = 'This browser cannot guarantee storage. Keep downloading the CSV.';
+    return;
+  }
+  navigator.storage.persisted().then(function(already){
+    if (already){
+      el.textContent = 'Storage is marked persistent, so Android will not clear it to reclaim space.';
+      return;
+    }
+    navigator.storage.persist().then(function(granted){
+      el.textContent = granted
+        ? 'Storage is marked persistent, so Android will not clear it to reclaim space.'
+        : 'Storage is not persistent yet. Installing this to your home screen usually grants it.';
+    });
+  });
+}
+reportStorage();
+
+/* ---------- sync to a Google Sheet ---------- */
+var EP_KEY = 'hill-legs-endpoint';
+var endpointInput = document.getElementById('endpoint');
+try { endpointInput.value = localStorage.getItem(EP_KEY) || ''; } catch(e){}
+
+document.getElementById('saveEndpoint').addEventListener('click', function(){
+  var v = endpointInput.value.trim();
+  try { localStorage.setItem(EP_KEY, v); } catch(e){}
+  document.getElementById('syncState').textContent =
+    v ? 'Endpoint saved. Sessions will be sent as you save them.' : 'Endpoint cleared. Sessions stay on this phone only.';
+  updateBadge();
+});
+
+function endpoint(){
+  try { return localStorage.getItem(EP_KEY) || ''; } catch(e){ return ''; }
+}
+
+function unsent(){
+  return store.sessions.filter(function(s){ return !s.sent; });
+}
+
+function updateBadge(){
+  var b = document.getElementById('syncBadge');
+  if (!endpoint()){ b.textContent = ''; b.className = 'sync-badge'; return; }
+  var n = unsent().length;
+  if (n === 0){ b.textContent = 'all synced'; b.className = 'sync-badge'; }
+  else { b.textContent = n + ' to send'; b.className = 'sync-badge pending'; }
+}
+
+function pushSessions(){
+  var url = endpoint();
+  var queue = unsent();
+  var state = document.getElementById('syncState');
+  if (!url || !queue.length){ updateBadge(); return Promise.resolve(); }
+
+  // text/plain avoids a CORS preflight that Apps Script cannot answer.
+  // The response is opaque, so a request that does not throw counts as sent;
+  // the Sheet itself is the confirmation.
+  var jobs = queue.map(function(s){
+    return fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        date: new Date(s.ts).toISOString(),
+        rounds_hill: s.rounds.A,
+        rounds_other: s.rounds.B,
+        weights: s.weights
+      })
+    }).then(function(){ s.sent = true; });
+  });
+
+  return Promise.all(jobs).then(function(){
+    save(); updateBadge();
+    state.textContent = 'Sent ' + queue.length + (queue.length === 1 ? ' session.' : ' sessions.');
+  }).catch(function(){
+    save(); updateBadge();
+    state.textContent = 'Could not reach the Sheet. Saved here and will retry next time.';
+  });
+}
+
+document.getElementById('syncNow').addEventListener('click', pushSessions);
+
+// try on load, and whenever the phone regains signal
+if (endpoint()) pushSessions();
+window.addEventListener('online', pushSessions);
+updateBadge();
+
+/* ---------- service worker ---------- */
+if ('serviceWorker' in navigator && location.protocol === 'https:'){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
